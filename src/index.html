@@ -6,10 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Random Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
-    <p>test</p>
+    <div id="chat">
+
+    </div>
+    <form id="msgForm">
+        <textarea id="msg"></textarea><br>
+        <input type="submit" value="Send">
+    </form>
+
+    <script>
+        (function () {
+            let socket = io.connect();
+            let messageForm = document.getElementById('msgForm');
+            let msg = document.getElementById('msg');
+            let chat = document.getElementById('chat');
+
+
+            // on form sumbit, send msg 
+            messageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                socket.emit("send-msg", msg.value);
+                msg.value = "";
+            });
+
+            socket.on('new-msg', (data) => {
+                chat.innerHTML += `<div>${data.msg}</div>`;
+            });
+        }());
+    </script>
 </body>
 
 </html>
