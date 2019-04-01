@@ -1,3 +1,4 @@
+
 const express = require('express');
 const http = require('http');
 const io = require('socket.io');
@@ -8,16 +9,14 @@ const listen = io.listen(server);
 let users = [];
 let connections = [];
 
-
 // initialize server
 server.listen(3000);
 console.log('server online');
 
 
 // response to get requests
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/src/index.html');
-});
+
+app.use(express.static(__dirname + '/src'));
 
 // on io connect 
 listen.sockets.on('connection', socket => {
@@ -76,6 +75,12 @@ listen.sockets.on('connection', socket => {
         }
 
     }
+
+
+    socket.on('dh-send', data => {
+        let index = connections.map(function (e) { return e.username; }).indexOf(data.to);
+        connections[index].emit('dh-get', data.key);
+    });
 
 });
 
