@@ -2,6 +2,7 @@
 const express = require('express');
 const http = require('http');
 const io = require('socket.io');
+const { StringDecoder } = require('string_decoder');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,8 +37,9 @@ listen.sockets.on('connection', socket => {
         let index = connections.map(function (e) { return e.username; }).indexOf(data.to);
         let msg = { msg: data.msg, uid: socket.username };
         connections[index].emit('new-msg', msg);
-        socket.emit('new-msg', msg)
-        console.log(socket.username + ': ' + data.msg);
+        socket.emit('new-msg', msg);
+        let decoder = new StringDecoder('utf8');
+        console.log(socket.username + ': ' + decoder.write(data.msg.m));
     });
 
     socket.on('new-user', data => {
