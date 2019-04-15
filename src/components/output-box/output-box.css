@@ -1,10 +1,17 @@
-.paper{
-  height:30rem;
+.output-box{
+  height:65vh;
   overflow-y: scroll;
   overflow-x: hidden;
-
   padding:10px;
+  margin-bottom: 15px;
 }
 ::-webkit-scrollbar {
     display: none;
+}
+
+
+@media (max-width:600px){
+  .output-box{
+    height:85vh;
+  }
 }

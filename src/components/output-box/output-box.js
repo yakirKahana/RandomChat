@@ -6,7 +6,7 @@ import './output-box.css';
 class OutputBox extends Component {
   render() {
     return (
-      <Paper className="paper" elevation={2}>
+      <Paper className="output-box" elevation={2}>
         <Message text="שלום!" me={true}/>
         <Message text="היי" me={false}/>
       </Paper>

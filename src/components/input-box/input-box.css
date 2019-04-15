@@ -1,0 +1,33 @@
+.input-box{
+  height:2rem;
+    padding:10px;
+}
+
+.rtl{
+
+  transform: rotateY(180deg);
+}
+
+.material-icons.rtl{
+  display: inline-block;
+  margin-right: 5px;
+}
+
+
+.exit-btn{
+  margin-left:3px !important;
+}
+
+.msg-input{
+width:70%;
+}
+.send-btn{
+  float:left;
+}
+
+
+@media (max-width:600px){
+  .msg-input{
+  width:60%;
+  }
+}
