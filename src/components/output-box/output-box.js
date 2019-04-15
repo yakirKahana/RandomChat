@@ -11,18 +11,28 @@ class OutputBox extends Component {
     }
   }
 
+  scrollToBottom(){
+    this.messagesEnding.scrollIntoView({ behavior: "smooth" });
+  }
+
+  componentDidUpdate(){
+    this.scrollToBottom();
+  }
 
   render() {
     setTimeout(()=>{
       let newMessages = this.state.messages;
       newMessages.push({text:'היי',me:false,key:Math.random()});
       this.setState({messages:newMessages});
-    },10000);
-    return (
-      <Paper className="output-box" elevation={2}>
+
+    },100);
+    return(
+      <Paper id="output" className="output-box" elevation={2}>
         {this.state.messages.map(msg=>{
           return <Message key={msg.key} text={msg.text} me={msg.me}/>
         })}
+
+        <span ref={element =>{this.messagesEnding = element}}></span>
       </Paper>
     );
   }
