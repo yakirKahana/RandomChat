@@ -14,8 +14,13 @@ class InputBox extends Component {
   constructor(){
     super();
     this.state = {
-      dialogOpen:false
+      dialogOpen:false,
+      msgText:""
     };
+  }
+
+  HandleTextInput=(e)=>{
+    this.setState({msgText : e.target.value});
   }
 
   HandelDialogOpen = ()=>{
@@ -25,14 +30,28 @@ class InputBox extends Component {
   HandelDialogClose = ()=>{
     this.setState({dialogOpen:false});
   }
+
+  //send msg if user presses enter
+  handleEnterPressed =(e)=>{
+    if(e.key === 'Enter'){
+      this.handleSendMsg();
+    }
+
+  }
+
+  //send msg to App component, clean state.msgText
+  handleSendMsg = ()=>{
+    this.props.onMessageSent(this.state.msgText);
+    this.setState({msgText : ''});
+  }
   render() {
     return (
       <Paper className="input-box" elevation={2}>
       <Button onClick={this.HandelDialogOpen} className="exit-btn" variant="text" size="small"><Icon className='rtl'>autorenew</Icon></Button>
 
-          <InputBase className="msg-input" placeholder="הודעה..."/>
+          <InputBase value={this.state.msgText} onChange={this.HandleTextInput} onKeyPress={this.handleEnterPressed} className="msg-input"  placeholder="הודעה..."/>
 
-          <Button className="send-btn" variant="contained" color="primary"><Icon className='rtl'>send</Icon></Button>
+          <Button onClick={this.handleSendMsg} className="send-btn" variant="contained" color="primary"><Icon className='rtl'>send</Icon></Button>
 
         <Dialog
         open={this.state.dialogOpen}

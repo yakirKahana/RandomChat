@@ -10,20 +10,29 @@ class App extends Component {
       messages:[{text:'שלום', me:true, key:Math.random()}]
     }
   }
+
+  handleMessageSent= (msgText)=>{
+    let newMessages = this.state.messages;
+    newMessages.push({text:msgText,me:true,key:Math.random()});
+    this.setState({messages:newMessages});
+  }
+
   render() {
     setTimeout(()=>{
       let newMessages = this.state.messages;
       newMessages.push({text:'היי',me:false,key:Math.random()});
       this.setState({messages:newMessages});
 
-    },1000);
+    },5000);
     return (
       <div className="chat">
         <OutputBox messages={this.state.messages} />
-        <InputBox/>
+        <InputBox onMessageSent={this.handleMessageSent} />
       </div>
     );
   }
+
+
 }
 
 export default App;
