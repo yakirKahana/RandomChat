@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "react-scripts build; node index.js",
+    "start": "react-scripts build && node index.js",
     "react": "react-scripts start",
     "build": "react-scripts build",
     "react-test": "react-scripts test",
@@ -20,7 +20,6 @@
   "bugs": {
     "url": "https://github.com/yakirKahana/RandomChat/issues"
   },
-  "homepage": "https://github.com/yakirKahana/RandomChat#readme",
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "express": "^4.16.4",

@@ -1,6 +1,7 @@
 
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const io = require('socket.io');
 const { StringDecoder } = require('string_decoder');
 
@@ -11,13 +12,20 @@ let users = [];
 let connections = [];
 
 // initialize server
-server.listen(3000);
+server.listen(7777);
 console.log('server online');
 
 
 // response to get requests
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
-app.use(express.static(__dirname + '/src'));
+app.use(express.static(path.join(__dirname, 'build')));
+
 
 // on io connect 
 listen.sockets.on('connection', socket => {
@@ -37,9 +45,9 @@ listen.sockets.on('connection', socket => {
         let index = connections.map(function (e) { return e.username; }).indexOf(data.to);
         let msg = { msg: data.msg, uid: socket.username };
         connections[index].emit('new-msg', msg);
-        socket.emit('new-msg', msg);
-        let decoder = new StringDecoder('utf8');
-        console.log(socket.username + ': ' + decoder.write(data.msg.m));
+
+        // let decoder = new StringDecoder('utf8');
+        // console.log(socket.username + ': ' + decoder.write(data.msg.m));
     });
 
     socket.on('new-user', data => {
