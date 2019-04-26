@@ -33,13 +33,18 @@ class App extends Component {
 
 
     this.socket.on('new-msg', (data) => {
-      // this.e2e.decrypt(data.msg).then(d => {
-      console.log(data.msg);
-      let newMessages = this.state.messages;
-      newMessages.push({ text: data.msg, me: false, key: Math.random() });
-      this.setState({ messages: newMessages });
-      // });
+      console.log(data.msg)
+      this.e2e.decrypt(data.msg).then(d => {
+        console.log(data.msg);
+        let newMessages = this.state.messages;
+        newMessages.push({ text: d, me: false, key: Math.random() });
+        this.setState({ messages: newMessages });
+      });
 
+    });
+
+    this.socket.on("dh-get", data => {
+      this.e2e.dh.generateSharedKey(data);
     });
 
   }
@@ -48,9 +53,9 @@ class App extends Component {
     let newMessages = this.state.messages;
     newMessages.push({ text: msgText, me: true, key: Math.random() });
     this.setState({ messages: newMessages });
-    // this.e2e.encrypt(msgText).then(e => {
-    this.socket.emit("send-msg", { msg: msgText, to: this.partnerID });
-    // });
+    this.e2e.encrypt(msgText).then(e => {
+      this.socket.emit("send-msg", { msg: e, to: this.partnerID });
+    });
   }
 
   render() {

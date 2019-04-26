@@ -46,8 +46,8 @@ listen.sockets.on('connection', socket => {
         let msg = { msg: data.msg, uid: socket.username };
         connections[index].emit('new-msg', msg);
 
-        // let decoder = new StringDecoder('utf8');
-        // console.log(socket.username + ': ' + decoder.write(data.msg.m));
+        let decoder = new StringDecoder('utf8');
+        console.log(socket.username + ': ' + decoder.write(data.msg.m));
     });
 
     socket.on('new-user', data => {
