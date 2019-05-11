@@ -27,7 +27,7 @@ class App extends Component {
     //eventListeners
     this.socket.on('new-partner', data => {
       this.partnerID = data;
-      
+
       let newState = this.state;
       newState.inChat = true;
       newState.messages = [];
@@ -39,9 +39,9 @@ class App extends Component {
 
 
     this.socket.on('new-msg', (data) => {
-      
+
       this.e2e.decrypt(data.msg).then(d => {
-        
+
         let newMessages = this.state.messages;
         newMessages.push({ text: d, me: false, key: Math.random() });
         this.setState({ messages: newMessages });
@@ -97,7 +97,7 @@ class App extends Component {
     return (
       <div className="chat">
         <OutputBox onRequestChat={this.handleRequestChat} inChat={this.state.inChat} messages={this.state.messages} />
-        <InputBox inChat={this.state.inChat} onEndMessage={this.handleEndChat} onMessageSent={this.handleMessageSent} />
+        <InputBox inChat={this.state.inChat} onEndChat={this.handleEndChat} onMessageSent={this.handleMessageSent} />
       </div>
     );
   }
