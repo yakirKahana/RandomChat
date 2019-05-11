@@ -49,19 +49,19 @@ listen.sockets.on('connection', socket => {
         connections.splice(connections.indexOf(socket), 1);
 
         //get user index in users array
-        let index = users.map(function (e) { return e.id; }).indexOf(socket.uid);
+        let index = getIndexOfUser(socket.uid);
         //check if user on chat if so, end chat with partner
         if (users.length > 0) {
             if (users[index]) {
                 if (users[index].inChat) {
                     // notify partner
-                    let partnerIndex = connections.map(function (e) { return e.uid }).indexOf(users[index].partner);
+                    let partnerIndex = getIndexOfConnection(users[index].partner);
                     if (connections[partnerIndex]) {
                         connections[partnerIndex].emit('partner-disconnect');
                     }
 
                     // update partner
-                    partnerUsersIndex = users.map(function (e) { return e.id }).indexOf(users[index].partner);
+                    partnerUsersIndex = getIndexOfUser(users[index].partner);
                     if (users[partnerUsersIndex]) {
                         users[partnerUsersIndex].inChat = false;
                         users[partnerUsersIndex].partner = -1;
@@ -84,7 +84,7 @@ listen.sockets.on('connection', socket => {
     //on msg recived -> send msg to data.to
     socket.on('send-msg', data => {
         //find index for data.to
-        let index = connections.map(function (e) { return e.uid; }).indexOf(data.to);
+        let index = getIndexOfConnection(data.to);
         //construct message
         let msg = { msg: data.msg, uid: socket.uid };
         //send message 
@@ -117,7 +117,7 @@ listen.sockets.on('connection', socket => {
     //when user requests chat
     socket.on('chat-request', data => {
         //get user's index
-        let index = users.map(function (e) { return e.id; }).indexOf(data);
+        let index = getIndexOfUser(data);
         //set users to looking for chat
         users[index].lookingForChat = true;
         console.log('');
@@ -128,10 +128,10 @@ listen.sockets.on('connection', socket => {
         //if found partner
         if (partner) {
             //get partner index
-            let partnerIndex = connections.map(function (e) { return e.uid; }).indexOf(partner);
+            let partnerIndex = getIndexOfConnection(partner);
 
             //get userIndex
-            let partnerUserIndex = users.map(function (e) { return e.id; }).indexOf(partner);
+            let partnerUserIndex = getIndexOfUser(partner);
             //set both of them thier partner's id
             connections[partnerIndex].emit("new-partner", data);
             socket.emit("new-partner", partner);
@@ -147,7 +147,7 @@ listen.sockets.on('connection', socket => {
     });
     //when user gets partner set thier lookingForChat to false
     socket.on('got-partner', (id) => {
-        let index = users.map(function (e) { return e.id; }).indexOf(id);
+        let index = getIndexOfUser(id);
         users[index].lookingForChat = false;
         console.log('');
         console.log(users);
@@ -187,7 +187,7 @@ listen.sockets.on('connection', socket => {
 
 
     socket.on('dh-send', data => {
-        let index = connections.map(function (e) { return e.uid; }).indexOf(data.to);
+        let index = getIndexOfConnection(data.to);
         connections[index].emit('dh-get', data.key);
     });
 
