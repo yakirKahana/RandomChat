@@ -22,7 +22,7 @@ class App extends Component {
 
   componentDidMount() {
     this.socket.emit('new-user', this.uid);
-    this.socket.emit('chat-request', this.uid);
+    this.handleRequestChat();
 
     //eventListeners
     this.socket.on('new-partner', data => {
@@ -30,6 +30,7 @@ class App extends Component {
       console.log(this.partnerID);
       let newState = this.state;
       newState.inChat = true;
+      newState.messages = [];
       newState.messages.push({ sysMsg: true, type: 0, key: Math.random() });
       this.setState(newState);
       this.socket.emit('got-partner', this.uid);
@@ -61,6 +62,14 @@ class App extends Component {
 
   }
 
+  handleRequestChat = () => {
+    this.socket.emit('chat-request', this.uid);
+    let newState = this.state;
+    newState.messages = [];
+    newState.messages.push({ sysMsg: true, type: 2, key: Math.random() });
+    this.setState(newState);
+  }
+
   handleMessageSent = (msgText) => {
     let newMessages = this.state.messages;
     newMessages.push({ text: msgText, me: true, key: Math.random() });
@@ -74,7 +83,7 @@ class App extends Component {
 
     return (
       <div className="chat">
-        <OutputBox inChat={this.state.inChat} messages={this.state.messages} />
+        <OutputBox onRequestChat={this.handleRequestChat} inChat={this.state.inChat} messages={this.state.messages} />
         <InputBox inChat={this.state.inChat} onMessageSent={this.handleMessageSent} />
       </div>
     );

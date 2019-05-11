@@ -42,16 +42,24 @@ listen.sockets.on('connection', socket => {
         let index = users.map(function (e) { return e.id; }).indexOf(socket.uid);
         //check if user on chat if so, end chat with partner
         if (users.length > 0) {
-            if (users[index].inChat) {
-                // notify partner
-                let partnerIndex = connections.map(function (e) { return e.uid }).indexOf(users[index].partner);
-                connections[partnerIndex].emit('partner-disconnect');
-                // update partner
-                partnerUsersIndex = users.map(function (e) { return e.id }).indexOf(users[index].partner);
-                users[partnerUsersIndex].inChat = false;
-                users[partnerUsersIndex].partner = -1;
-                console.log('')
-                console.log(users);
+            if (users[index]) {
+                if (users[index].inChat) {
+                    // notify partner
+                    let partnerIndex = connections.map(function (e) { return e.uid }).indexOf(users[index].partner);
+                    if (connections[partnerIndex]) {
+                        connections[partnerIndex].emit('partner-disconnect');
+                    }
+
+                    // update partner
+                    partnerUsersIndex = users.map(function (e) { return e.id }).indexOf(users[index].partner);
+                    if (users[partnerUsersIndex]) {
+                        users[partnerUsersIndex].inChat = false;
+                        users[partnerUsersIndex].partner = -1;
+                    }
+
+                    console.log('')
+                    console.log(users);
+                }
             }
         }
         //remove user from users array
@@ -70,11 +78,17 @@ listen.sockets.on('connection', socket => {
         //construct message
         let msg = { msg: data.msg, uid: socket.uid };
         //send message 
-        connections[index].emit('new-msg', msg);
+        if (connections[index]) {
+            connections[index].emit('new-msg', msg);
+            //decode and log message
+            let decoder = new StringDecoder('utf8');
+            console.log(socket.uid + ': ' + decoder.write(data.msg.m));
+        } else {
+            socket.emit('partner-disconnect');
+        }
 
-        //decode and log message
-        let decoder = new StringDecoder('utf8');
-        console.log(socket.uid + ': ' + decoder.write(data.msg.m));
+
+
     });
 
     //set new user

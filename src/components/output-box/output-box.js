@@ -26,6 +26,8 @@ class OutputBox extends Component {
 
           if (!msg.sysMsg) {
             return <Message key={msg.key} text={msg.text} me={msg.me} />
+          } else if (msg.type === 1) {
+            return <SystemMessage onRequestChat={this.props.onRequestChat} type={msg.type} />
           } else {
             return <SystemMessage type={msg.type} />
           }

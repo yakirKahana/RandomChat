@@ -18,9 +18,11 @@ class SystemMessage extends Component {
             case 1:
                 this.msg = <span>
                     <p>פלוני התנתק מהשיחה</p>
-                    <Button variant="contained" color="primary">התחל שיחה חדשה</Button>
+                    <Button onClick={this.props.onRequestChat} variant="contained" color="primary">התחל שיחה חדשה</Button>
                 </span>;
-
+                break;
+            case 2:
+                this.msg = 'מחפש שותף לשיחה...';
                 break;
             default:
                 this.msg = null;
