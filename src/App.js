@@ -5,7 +5,7 @@ import OutputBox from './components/output-box/output-box';
 import InputBox from './components/input-box/input-box';
 import io from 'socket.io-client';
 import e2ee from './e2ee';
-console.log(e2ee);
+
 class App extends Component {
   constructor() {
     super();
@@ -27,7 +27,7 @@ class App extends Component {
     //eventListeners
     this.socket.on('new-partner', data => {
       this.partnerID = data;
-      console.log(this.partnerID);
+      
       let newState = this.state;
       newState.inChat = true;
       newState.messages = [];
@@ -39,9 +39,9 @@ class App extends Component {
 
 
     this.socket.on('new-msg', (data) => {
-      console.log(data.msg)
+      
       this.e2e.decrypt(data.msg).then(d => {
-        console.log(data.msg);
+        
         let newMessages = this.state.messages;
         newMessages.push({ text: d, me: false, key: Math.random() });
         this.setState({ messages: newMessages });
@@ -53,6 +53,7 @@ class App extends Component {
       this.e2e.dh.generateSharedKey(data);
     });
 
+    // when partenr disconnects -> set this.state.inChat to false, notify users that partner ended the chat
     this.socket.on('partner-disconnect', () => {
       let newState = this.state;
       newState.inChat = false;
@@ -62,6 +63,7 @@ class App extends Component {
 
   }
 
+  //when requesting chat ->req new chat from server, clean messages, add systemMessage of 'looking for chat', 
   handleRequestChat = () => {
     this.socket.emit('chat-request', this.uid);
     let newState = this.state;
@@ -70,13 +72,24 @@ class App extends Component {
     this.setState(newState);
   }
 
+
+  //when sending message -> add to state, encrypt and send
   handleMessageSent = (msgText) => {
+    //add to state
     let newMessages = this.state.messages;
     newMessages.push({ text: msgText, me: true, key: Math.random() });
     this.setState({ messages: newMessages });
+    //encrypt message and send
     this.e2e.encrypt(msgText).then(e => {
       this.socket.emit("send-msg", { msg: e, to: this.partnerID });
     });
+  }
+
+
+  //when user ends chat -> send message to server, and request a new chat
+  handleEndChat = () => {
+    this.socket.emit('end-chat', this.partnerID);
+    this.handleRequestChat();
   }
 
   render() {
@@ -84,7 +97,7 @@ class App extends Component {
     return (
       <div className="chat">
         <OutputBox onRequestChat={this.handleRequestChat} inChat={this.state.inChat} messages={this.state.messages} />
-        <InputBox inChat={this.state.inChat} onMessageSent={this.handleMessageSent} />
+        <InputBox inChat={this.state.inChat} onEndMessage={this.handleEndChat} onMessageSent={this.handleMessageSent} />
       </div>
     );
   }

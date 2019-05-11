@@ -11,64 +11,71 @@ import Icon from '@material-ui/core/Icon';
 import InputBase from '@material-ui/core/InputBase';
 
 class InputBox extends Component {
-  constructor(){
+  constructor() {
     super();
     this.state = {
-      dialogOpen:false,
-      msgText:""
+      dialogOpen: false,
+      msgText: ""
     };
   }
 
-  HandleTextInput=(e)=>{
-    this.setState({msgText : e.target.value});
+  HandleTextInput = (e) => {
+    this.setState({ msgText: e.target.value });
   }
 
-  HandelDialogOpen = ()=>{
-    this.setState({dialogOpen:true});
+  HandelDialogOpen = () => {
+    this.setState({ dialogOpen: true });
   }
 
-  HandelDialogClose = ()=>{
-    this.setState({dialogOpen:false});
+  HandelDialogClose = () => {
+    this.setState({ dialogOpen: false });
   }
 
+  //end chat
+  handleEndChat = () => {
+    this.props.onEndMessage();
+    this.HandelDialogClose();
+  }
   //send msg if user presses enter
-  handleEnterPressed =(e)=>{
-    if(e.key === 'Enter'){
+  handleEnterPressed = (e) => {
+    if (e.key === 'Enter') {
       this.handleSendMsg();
     }
 
   }
 
   //send msg to App component, clean state.msgText
-  handleSendMsg = ()=>{
-    this.props.onMessageSent(this.state.msgText);
-    this.setState({msgText : ''});
+  handleSendMsg = () => {
+    if (this.props.inChat) {
+      this.props.onMessageSent(this.state.msgText);
+      this.setState({ msgText: '' });
+    }
   }
   render() {
     return (
       <Paper className="input-box" elevation={2}>
-      <Button onClick={this.HandelDialogOpen} className="exit-btn" variant="text" size="small"><Icon className='rtl'>autorenew</Icon></Button>
+        <Button onClick={this.HandelDialogOpen} className="exit-btn" variant="text" size="small"><Icon className='rtl'>autorenew</Icon></Button>
 
-          <InputBase value={this.state.msgText} onChange={this.HandleTextInput} onKeyPress={this.handleEnterPressed} className="msg-input"  placeholder="הודעה..."/>
+        <InputBase value={this.state.msgText} onChange={this.HandleTextInput} onKeyPress={this.handleEnterPressed} className="msg-input" placeholder="הודעה..." />
 
-          <Button onClick={this.handleSendMsg} className="send-btn" variant="contained" color="primary"><Icon className='rtl'>send</Icon></Button>
+        <Button onClick={this.handleSendMsg} className="send-btn" variant="contained" color="primary"><Icon className='rtl'>send</Icon></Button>
 
         <Dialog
-        open={this.state.dialogOpen}
-        onClose={this.HandelDialogClose}
+          open={this.state.dialogOpen}
+          onClose={this.HandelDialogClose}
         >
-        <DialogTitle>לסיים שיחה?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>לסיים ולהתחיל שיחה חדשה?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={this.HandelDialogClose} color="primary" autoFocus>
-                כן
+          <DialogTitle>לסיים שיחה?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>לסיים ולהתחיל שיחה חדשה?</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleEndChat} color="primary" autoFocus>
+              כן
           </Button>
-          <Button onClick={this.HandelDialogClose} color="primary">
+            <Button onClick={this.HandelDialogClose} color="primary">
               לא
           </Button>
-        </DialogActions>
+          </DialogActions>
         </Dialog>
 
       </Paper>

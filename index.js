@@ -17,6 +17,16 @@ server.listen(7777);
 console.log('server online');
 
 
+function getIndexOfUser(id) {
+    let i = users.map(function (e) { return e.id; }).indexOf(id);
+    return i;
+}
+
+function getIndexOfConnection(id) {
+    let i = connections.map(function (e) { return e.uid }).indexOf(id);
+    return i;
+}
+
 // response to get requests
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -121,15 +131,15 @@ listen.sockets.on('connection', socket => {
             let partnerIndex = connections.map(function (e) { return e.uid; }).indexOf(partner);
 
             //get userIndex
-            let pratnerUserIndex = users.map(function (e) { return e.id; }).indexOf(partner);
+            let partnerUserIndex = users.map(function (e) { return e.id; }).indexOf(partner);
             //set both of them thier partner's id
             connections[partnerIndex].emit("new-partner", data);
             socket.emit("new-partner", partner);
             //set chat and partner 
             users[index].inChat = true;
             users[index].partner = partner;
-            users[pratnerUserIndex].inChat = true;
-            users[pratnerUserIndex].partner = data;
+            users[partnerUserIndex].inChat = true;
+            users[partnerUserIndex].partner = data;
 
 
         }
@@ -179,6 +189,17 @@ listen.sockets.on('connection', socket => {
     socket.on('dh-send', data => {
         let index = connections.map(function (e) { return e.uid; }).indexOf(data.to);
         connections[index].emit('dh-get', data.key);
+    });
+
+    //when user ends the chat
+    socket.on('end-chat', data => {
+        let myIndex = getIndexOfUser(socket.uid);
+        let othersIndex = getIndexOfUser(data);
+        connections[getIndexOfConnection(data)].emit('partner-disconnect');
+        users[myIndex].inChat = false;
+        users[myIndex].partner = -1;
+        users[othersIndex].inChat = false;
+        users[othersIndex].partner = -1;
     });
 
 });
