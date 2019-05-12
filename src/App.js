@@ -9,7 +9,7 @@ import e2ee from './e2ee';
 class App extends Component {
   constructor() {
     super();
-    this.io = new io('localhost:7777'); //TODO: remove arg before production
+    this.io = new io('');
     this.socket = this.io.connect();
     this.e2e = new e2ee();
     this.state = {
@@ -20,29 +20,43 @@ class App extends Component {
   }
 
   componentDidMount() {
+    //on start, notify server and get ID.
     this.socket.emit('new-user');
 
 
     /*eventListeners*/
 
+    //when getting new id, assgin id to this.uid and request chat
     this.socket.on('new-id', (data) => {
       this.uid = data;
-      console.log(data);
       this.handleRequestChat();
     });
 
+    //handle reciving a chat partner
     this.socket.on('new-partner', data => {
+      //add the partnerID to this.partnerID
       this.partnerID = data;
+
+      //update state: clear all messages, add sysMsg to notify user on chat start
       let newState = this.state;
       newState.inChat = true;
       newState.messages = [];
       newState.messages.push({ sysMsg: true, type: 0, key: Math.random() });
       this.setState(newState);
+
+      //let server know that we got partner
       this.socket.emit('got-partner', this.uid);
+
+      //start diffie hellman, send public key to partner
       this.socket.emit('dh-send', { key: this.e2e.dh.PublicExported, to: this.partnerID });
     });
 
+    // when getting partner's public key: generate shared secret
+    this.socket.on("dh-get", data => {
+      this.e2e.dh.generateSharedKey(data);
+    });
 
+    //when reciving new message: decrypt the message, and add the decrypted msg to state.messages
     this.socket.on('new-msg', (data) => {
 
       this.e2e.decrypt(data.msg).then(d => {
@@ -54,11 +68,8 @@ class App extends Component {
 
     });
 
-    this.socket.on("dh-get", data => {
-      this.e2e.dh.generateSharedKey(data);
-    });
 
-    // when partenr disconnects -> set this.state.inChat to false, notify users that partner ended the chat
+    // when partenr disconnects: set this.state.inChat to false, notify users that partner ended the chat
     this.socket.on('partner-disconnect', () => {
       let newState = this.state;
       newState.inChat = false;
@@ -68,9 +79,12 @@ class App extends Component {
 
   }
 
-  //when requesting chat ->req new chat from server, clean messages, add systemMessage of 'looking for chat', 
+  //when requesting chat: 
   handleRequestChat = () => {
+    //req new chat from server
     this.socket.emit('chat-request', this.uid);
+
+    //clean messages, add systemMessage of 'looking for chat'
     let newState = this.state;
     newState.messages = [];
     newState.messages.push({ sysMsg: true, type: 2, key: Math.random() });
@@ -78,12 +92,13 @@ class App extends Component {
   }
 
 
-  //when sending message -> add to state, encrypt and send
+  //when sending message: 
   handleMessageSent = (msgText) => {
     //add to state
     let newMessages = this.state.messages;
     newMessages.push({ text: msgText, me: true, key: Math.random() });
     this.setState({ messages: newMessages });
+
     //encrypt message and send
     this.e2e.encrypt(msgText).then(e => {
       this.socket.emit("send-msg", { msg: e, to: this.partnerID });
@@ -91,7 +106,7 @@ class App extends Component {
   }
 
 
-  //when user ends chat -> send message to server, and request a new chat
+  //when user ends chat: send message to server, and request a new chat
   handleEndChat = () => {
     this.socket.emit('end-chat', this.partnerID);
     this.handleRequestChat();

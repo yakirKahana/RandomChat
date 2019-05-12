@@ -19,10 +19,12 @@ class InputBox extends Component {
     };
   }
 
+  //when user enters text: add it to state
   HandleTextInput = (e) => {
     this.setState({ msgText: e.target.value });
   }
 
+  //open dialog
   HandelDialogOpen = () => {
     if (this.props.inChat) {
       this.setState({ dialogOpen: true });
@@ -30,6 +32,7 @@ class InputBox extends Component {
 
   }
 
+  //close dialog
   HandelDialogClose = () => {
     this.setState({ dialogOpen: false });
   }
@@ -42,16 +45,17 @@ class InputBox extends Component {
 
     this.HandelDialogClose();
   }
+
   //send msg if user presses enter
   handleEnterPressed = (e) => {
     if (e.key === 'Enter') {
       this.handleSendMsg();
     }
-
   }
 
-  //send msg to App component, clean state.msgText
+  //send msg
   handleSendMsg = () => {
+    //if user is in chat AND thier msg is not empty send message to AppComponent
     if (this.props.inChat && this.state.msgText !== '') {
       this.props.onMessageSent(this.state.msgText);
       this.setState({ msgText: '' });
