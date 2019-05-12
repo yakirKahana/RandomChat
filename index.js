@@ -52,6 +52,7 @@ listen.sockets.on('connection', socket => {
 
             let myIndex = getIndexOfConnection(socket.info.id);
             connections.splice(myIndex, 1);
+            console.log(`${connections.length} sockets connected`);
         }
 
 
@@ -62,7 +63,7 @@ listen.sockets.on('connection', socket => {
         //find index for data.to
         let index = getIndexOfConnection(data.to);
         //construct message
-        let msg = { msg: data.msg, uid: socket.uid };
+        let msg = { msg: data.msg, uid: socket.info.id };
         //send message 
         if (connections[index]) {
             connections[index].emit('new-msg', msg);
@@ -73,16 +74,29 @@ listen.sockets.on('connection', socket => {
             socket.emit('partner-disconnect');
         }
 
-
-
     });
 
+    //set ID for user- make sure there are no doubles
+    function generateUserID() {
+        console.log('generating id...');
+        let newID;
+        do {
+            newID = Math.floor(Math.random() * 900000000);
+        } while (getIndexOfConnection(newID) !== -1);
+        console.log('the id is:' + newID);
+        return newID;
+    }
+
+
     //set new user
-    socket.on('new-user', data => {
+    socket.on('new-user', () => {
         //get uid from user. 
         //DOTO: have server send the user thier id- to make sure there are no doubles
+        let id = generateUserID();
+        console.log(id);
+        socket.emit('new-id', id);
         //construct user and add it to socket
-        socket.info = { id: data, lookingForChat: false, inChat: false, partner: -1 };
+        socket.info = { id: id, lookingForChat: false, inChat: false, partner: -1 };
 
         //add socket to connections
         connections.push(socket);
@@ -150,7 +164,7 @@ listen.sockets.on('connection', socket => {
         let shuffledUsers = shuffle(connections);
         for (let i = 0; i < shuffledUsers.length; i++) {
             if (shuffledUsers[i].info.id != id && shuffledUsers[i].info.lookingForChat) {
-                console.log("found partner for: " + id);
+                console.log("found partner for: " + id + ',\npartner: ' + shuffledUsers[i].info.id);
                 return shuffledUsers[i].info.id;
             }
         }

@@ -12,7 +12,6 @@ class App extends Component {
     this.io = new io('localhost:7777'); //TODO: remove arg before production
     this.socket = this.io.connect();
     this.e2e = new e2ee();
-    this.uid = Math.floor(Math.random() * 900000000);
     this.state = {
       messages: [],
       inChat: false
@@ -21,13 +20,19 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.socket.emit('new-user', this.uid);
-    this.handleRequestChat();
+    this.socket.emit('new-user');
 
-    //eventListeners
+
+    /*eventListeners*/
+
+    this.socket.on('new-id', (data) => {
+      this.uid = data;
+      console.log(data);
+      this.handleRequestChat();
+    });
+
     this.socket.on('new-partner', data => {
       this.partnerID = data;
-
       let newState = this.state;
       newState.inChat = true;
       newState.messages = [];
